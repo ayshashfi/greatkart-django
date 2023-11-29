@@ -223,3 +223,4 @@ def unblock_user(request,id):
     user.is_active=True
     user.save()
     return redirect('admin_users')
+

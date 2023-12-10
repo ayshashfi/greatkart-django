@@ -1,4 +1,4 @@
-{%extends 'admin_base.html'%}
+{%extends 'admin/admin_base.html'%}
 {load static}
 
 
@@ -16,13 +16,13 @@
             </a>
         </div>
     </div>
-    <div class="card mb-4">
+    {% comment %} <div class="card mb-4">
         <header class="card-header">
             <div class="row gx-3">
                 <div class="col-lg-4 col-md-6 me-auto">
                     <div class="input-group">
                         <div class="form-outline">
-                            <form action="{% url 'category_search' %}" method="POST">
+                            <form action="#" method="POST">
                             {% csrf_token %}
                                 <div>
 
@@ -38,7 +38,7 @@
                 </div>
                 
                
-            </div>
+            </div> {% endcomment %}
         </header>
         <!-- card-header end// -->
         <div class="card-body">
@@ -59,11 +59,11 @@
                             <td> {{c.id}} </td>
                             <td>
                                 <div style="width: 50px;" class="overflow-hidden">
-                                    <img class="w-100" src=" {{c.categories_image.url}} " alt="">
+                                    <img class="w-100" src=" {{c.cat_image.url}} " alt="">
                                 </div>
                             </td>
-                            <td> {{c.categories}} </td>
-                            <td> {{c.categories_discription}} </td>
+                            <td> {{c.category_name}} </td>
+                            <td> {{c.description}} </td>
                             <td>
                                 <!-- Button trigger modal -->
                                 <button type="button" class="btn btn spacer c"
@@ -164,7 +164,7 @@
                 <li class="page-item active">
                     <a class="page-link " href="?page={{product_page.paginator.num_pages}}"><i class="material-icons md-chevron_right"></i></a>
                 </li>
-            </ul>
+            </ul> 
         </nav>
     </div>
 </section>
@@ -185,7 +185,7 @@
                     </div>
                     <div class="form-outline mb-4">
                         <label class="form-label" for="form3Example3cg">Name</label>
-                        <input name='categories' value="" type="text" id="form3Example3cg"
+                        <input name='category_name' value="" type="text" id="form3Example3cg"
                             class="form-control form-control-lg" />
                     </div>
 
@@ -199,7 +199,7 @@
 
                     <div class="form-outline mb-4">
                         <label class="form-label" for="form3Example3cg">Description</label>
-                        <input name='categories_discription' value="" type="text" id="form3Example3cg"
+                        <input name='description' value="" type="text" id="form3Example3cg"
                             class="form-control form-control-lg" />
                     </div>
 
@@ -223,7 +223,7 @@
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            delete Category {{c.categories }}
+                                            delete Category {{c.category_name }}
                                         </div>
                                         <div class="modal-footer">
                                             <!-- one here -->
@@ -251,13 +251,14 @@ aria-labelledby="exampleModalLabel" aria-hidden="true">
                     aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{% url 'editcategory' c.slug %}"
-                    enctype="multipart/form-data">
+                <form method="POST" action="{% url 'edit_category' editcategory_id=c.id %}" enctype="multipart/form-data">
+
+
                     {% csrf_token %}
 
                     <div style="width: 100px;"
                         class="card-header category-img position-relative overflow-hidden bg-transparent border p-0">
-                        <img class="img-fluid w-100" src="{{c.categories_image.url}} "
+                        <img class="img-fluid w-100" src="{{c.cat_image.url}} "
                             alt="">
                     </div>
 
@@ -270,14 +271,14 @@ aria-labelledby="exampleModalLabel" aria-hidden="true">
                     </div>
 
                     <div class="form-outline mb-4">
-                        <input name='categories' value="{{c.categories}}" type="text"
+                        <input name='category_name' value="{{c.category_name}}" type="text"
                             id="form3Example3cg" class="form-control form-control-lg" />
                         <label class="form-label" for="form3Example3cg">Category
                             name</label>
                     </div>
                     <div class="form-outline mb-4">
-                        <input name='categories_discription'
-                            value="{{c.categories_discription}}" type="text"
+                        <input name='description'
+                            value="{{c.description}}" type="text"
                             id="form3Example3cg" class="form-control form-control-lg" />
                         <label class="form-label"
                             for="form3Example3cg">Description</label>

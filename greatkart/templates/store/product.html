@@ -1,0 +1,227 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products</h2>
+        </div>
+        <div class="col-lg-2 col-6 col-md-3">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#addCategory">
+                <button type="submit" class="btn btn-primary"> Add Products </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr class="text-uppercase">
+                        <th scope="col">id</th>
+                        <th scope="col">Product name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">image</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr class="text-uppercase">
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.product_name }}</td>
+                        <td>{{ product.price }}</td>
+                        <td>
+                            {% if product.images %}
+                            <div style="width: 50px;" class="overflow-hidden">
+                                <img class="w-100" src="{{ product.images.url }}" alt="{{ product.product_name }}">
+                            </div>
+                            {% else %}
+                            No Image
+                            {% endif %}
+                        </td>
+                        <td>{{ product.category.category_name }}</td>
+                        <td>{{ product.description }}</td>
+                        <td>{{ product.stock }}</td>
+                        <td>
+                            <button type="button" class="btn btn spacer c"
+                                style="background-color: rgb(246, 250, 10); color:rgb(102, 94, 94)"
+                                data-bs-toggle="modal" data-bs-target="#confirmEdit{{forloop.counter}}">
+                                <i class="ti ti-edit"></i> Edit
+                            </button>
+
+                            <button type="button" class="btn btn c"
+                                style="background-color: rgb(239, 7, 54); color:rgb(255, 255, 255)"
+                                data-bs-toggle="modal" data-bs-target="#exampleModal{{forloop.counter}}">
+                                <i class="ti ti-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {% for i in page_nums %}
+                <li class="page-item active"><a class="page-link" href="?page={{forloop.counter}}">{{forloop.counter}}</a>
+                </li>
+                {% endfor %}
+
+                <li class="page-item active">
+                    <a class="page-link " href="?page={{product_page.paginator.num_pages}}">
+                        <i class="material-icons md-chevron_right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+<div class="modal fade" id="addCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Product</h1>
+                <br>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'add_product' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div style="width: 100px;" class=""></div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Product Name</label>
+                        <input name='product_name' value="" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Price</label>
+                        <input name='price' value="" type="text" id="form3Example3cg_price"
+                            class="form-control form-control-lg" />
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="image-input">Image</label>
+                        <input name="images" type="file" accept="image/png, image/jpeg" class="form-control"
+                            id="image-input" />
+                        <small id="image-error" class="text-danger text-center"></small>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Stock</label>
+                        <input name='stock' value="" type="text" id="form3Example3cg_stock"
+                            class="form-control form-control-lg" />
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Description</label>
+                        <textarea name='description' id="form3Example3cg_description"
+                            class="form-control form-control-lg"></textarea>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form3Example3cg">Category</label>
+                        <select class="form-select" name="category">
+                            {% for c in categories %}
+                            <option value="{{c.id}}">{{c.category_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary" type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for p in product_page %}
+<div class="modal fade" id="exampleModal{{forloop.counter}}" tabindex="-1"
+                                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Delete</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            delete product {{p.product_name }}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <!-- one here -->
+                                            <form action="{% url 'delete_product' deleteproduct_id=p.id %}">
+
+                                                <button type="submit" class="btn btn"
+                                                    style="background-color: rgb(239, 7, 54); color:rgb(255, 255, 255)">Confirm</button>
+                                            </form>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+<div class="modal fade" id="confirmEdit{{ forloop.counter }}" tabindex="-1"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title fs-5" id="exampleModalLabel">Edit Product</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'edit_product' product_id=p.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-outline mb-4">
+                        <input name='product_name' value="{{ p.product_name }}" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                        <label class="form-label" for="form3Example3cg">Product name</label>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input name='price' value="{{ p.price }}" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                        <label class="form-label" for="form3Example3cg">Price</label>
+                    </div>
+                    <div style="width: 100px;"
+                        class="card-header category-img position-relative overflow-hidden bg-transparent border p-0">
+                        <img class="img-fluid w-100" src="{{ p.images.url }}" alt="">
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input name="images" type="file" accept="image/png, image/jpeg, image/svg"
+                            class="form-control" id="image-inputs" />
+                        <small id="image-errors" class="text-danger text-center"></small>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input name='category' value="{{ p.category.id }}" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                        <label class="form-label" for="form3Example3cg">Category</label>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input name='description' value="{{ p.description }}" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                        <label class="form-label" for="form3Example3cg">Description</label>
+                    </div>
+                    <div class="form-outline mb-4">
+                        <input name='stock' value="{{ p.stock }}" type="text" id="form3Example3cg"
+                            class="form-control form-control-lg" />
+                        <label class="form-label" for="form3Example3cg">Stock</label>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit"
+                            class="btn btn-primary btn-lg gradient-custom-4 w-50 text-light">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}

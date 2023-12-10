@@ -7,7 +7,7 @@ $(document).ready(function () {
 
     /* ///////////////////////////////////////
 
-    THESE FOLLOWING SCRIPTS ONLY FOR BASIC USAGE, 
+    THESE FOLLOWING SCRIPTS ONLY FOR BASIC USAGE,
     For sliders, interactions and other
 
     */ ///////////////////////////////////////
@@ -57,7 +57,6 @@ $(document).ready(function () {
 
 });
 // jquery end
-
 
 setTimeout(function () {
     $('#message').fadeOut('slow')

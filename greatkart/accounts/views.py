@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .forms import RegistrationForm,UserForm,UserProfileForm
-from .models import Account,UserProfile
-from orders.models import Order
+from .models import Account,UserProfile,MyAccountManager
+from orders.models import Order,OrderProduct
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
 
@@ -57,67 +57,67 @@ def register(request):
     return render(request, 'accounts/register.html', context)
 
     
+
+
 def login(request):
-    if request.method=='POST':
-        email=request.POST['email']
-        password=request.POST['password']
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+       
         
-        user=auth.authenticate(email=email,password=password)
-        
+        user = auth.authenticate(email=email, password=password)
+
         if user is not None:
+            if not user.is_active:
+                messages.error(request, 'Your account is blocked by admin!!')
+                return redirect('login')
+
+            auth.login(request, user)
+            messages.success(request, 'You are now logged in.')
+
             try:
-                cart=Cart.objects.get(cart_id=_cart_id(request))
-                is_cart_item_exists=CartItem.objects.filter(cart=cart).exists()
-                if is_cart_item_exists:
-                    cart_item=CartItem.objects.filter(cart=cart)
-                    
-                    product_variation=[]
-                    for item in cart_item:
-                        variation=item.variations.all()
-                        product_variation.append(list(variation))
-                    
-                    #get the cart items from the user to access his product variation
-                    cart_item=CartItem.objects.filter(user=user)
-                    ex_var_list=[]
-                    id=[]
-                    for item in cart_item:
-                        existing_variation=item.variations.all()
-                        ex_var_list.append(list(existing_variation))
-                        id.append(item.id) 
-                        
-                    for pr in product_variation:
-                        if pr in ex_var_list:
-                            index=ex_var_list.index(pr)
-                            item_id=id[index]
-                            item=CartItem.objects.get(id=item_id)
-                            item.quantity+=1
-                            item.user=user
-                            item.save() 
-                        else:
-                            cart_item=CartItem.objects.filter(cart=cart)
-                            for item in cart_item:
-                                item.user=user
-                                item.save()
-                        
-            except:
-                pass
-            auth.login(request,user)
-            messages.success(request,'You are now logged in.')
-            url=request.META.get('HTTP_REFERER')
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+            except Cart.DoesNotExist:
+                cart = Cart.objects.create(cart_id=_cart_id(request))
+
+            is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+
+            if is_cart_item_exists:
+                cart_items = CartItem.objects.filter(cart=cart)
+
+                for cart_item in cart_items:
+                    existing_variation = set(cart_item.variations.all())
+                    user_cart_items = CartItem.objects.filter(user=user)
+
+                    for user_cart_item in user_cart_items:
+                        if set(user_cart_item.variations.all()) == existing_variation:
+                            user_cart_item.quantity += cart_item.quantity
+                            user_cart_item.save()
+                            break
+                    else:
+                        CartItem.objects.create(
+                            cart=cart,
+                            user=user,
+                            quantity=cart_item.quantity,
+                            variations=cart_item.variations.all()
+                        )
+
+            url = request.META.get('HTTP_REFERER')
             try:
-                query=requests.utils.urlparse(url).query
-                
-                params=dict(x.split('=') for x in query.split('&'))
+                query = requests.utils.urlparse(url).query
+                params = dict(x.split('=') for x in query.split('&'))
                 if 'next' in params:
-                    nextPage=params['next']
+                    nextPage = params['next']
                     return redirect(nextPage)
-                
+
             except:
                 return redirect('home')
         else:
-            messages.error(request,'Invalid login credentials')
+            messages.error(request, 'Invalid login credentials')
             return redirect('login')
-    return render(request,'accounts/login.html')
+
+    return render(request, 'accounts/login.html')
+
 
 @login_required(login_url='login')
 def logout(request):
@@ -145,8 +145,10 @@ def activate(request,uidb64,token):
 def dashboard(request):
     orders=Order.objects.order_by('-created_at').filter(user_id=request.user.id,is_ordered=True)
     orders_count=orders.count()
+    userprofile=UserProfile.objects.get(user_id=request.user.id)
     context={
          'orders_count':orders_count,
+         'userprofile':userprofile,
     }
     return render (request, 'accounts/dashboard.html',context)     
 
@@ -267,6 +269,20 @@ def change_password(request):
     return render(request, 'accounts/change_password.html')
 
     
+@login_required(login_url='login') 
+def order_detail(request, order_id):
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
+    order = Order.objects.get(order_number=order_id)
+    subtotal = 0
+    for i in order_detail:
+        subtotal += i.product_price * i.quantity
+
+    context = {
+        'order_detail': order_detail,
+        'order': order,
+        'subtotal': subtotal,
+    }
+    return render(request, 'accounts/order_detail.html', context)
     
 # def block_user(request,id):
 #     user=Account.objects.get(id=id)

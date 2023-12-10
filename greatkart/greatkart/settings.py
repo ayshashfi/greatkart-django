@@ -73,7 +73,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "category.context_processors.menu_links",
-                "carts.context_processors.counter"
+                "carts.context_processors.counter",
+                
             ],
         },
     },
@@ -124,12 +125,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 
-STATIC_URL = 'static/'
-
-STATIC_ROOT= os.path.join(BASE_DIR,'staticfiles')
-
-STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
-
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR /'static'
+STATICFILES_DIRS = [
+    'greatkart/static',
+]
 #media files configuration
 
 MEDIA_URL = '/media/'
@@ -146,15 +146,6 @@ MESSAGE_TAGS = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-JAZZMIN_SETTINGS =  {
-    # Welcome text on the login screen
-    "welcome_sign": "Welcome to Admin Panel",
-    # Logo to use for your site, must be present in static files, used for brand on top left
-    "site_logo": "images/logo.png",
-    "site_header": None,
-    "site_brand": "Admin",
-
-}
 
 #SMTP CONFIGURATION
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'

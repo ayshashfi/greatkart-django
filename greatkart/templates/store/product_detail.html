@@ -1,7 +1,6 @@
-
 {% extends 'base.html' %}
-
 {% load static %}
+
 {% block content %}
 
 <section class="section-content padding-y bg">
@@ -12,11 +11,19 @@
 			<div class="row no-gutters">
 				<aside class="col-md-6">
 					<article class="gallery-wrap">
-						<div class="img-big-wrap">
-							<a href="#"><img src="{{ single_product.images.url }}"></a>
+						<div class="img-big-wrap mainImage">
+							<center><img src="{{ single_product.images.url }}"></center>
 						</div> <!-- img-big-wrap.// -->
 
 					</article> <!-- gallery-wrap .end// -->
+					<ul class="thumb">
+						<li>
+							<a href="{{ single_product.images.url }}" target="mainImage"><img src="{{ single_product.images.url }}" alt="Product Image"></a>
+							{% for i in product_gallery %}
+							<a href="{{i.image.url}}" target="mainImage"><img src="{{i.image.url}}" alt="Product Image"></a>
+							{% endfor %}
+						</li>
+					</ul>
 				</aside>
 				<main class="col-md-6 border-left">
 
@@ -59,7 +66,7 @@
 							<div class="row">
 								<div class="item-option-select">
 									<h6>Select Size</h6>
-									<select name="size" class="form-control">
+									<select name="size" class="form-control" required>
 										<option value="" disabled selected>Select</option>
 										{% for i in single_product.variation_set.sizes %}
 										<option value="{{ i.variation_value | lower }}">{{ i.variation_value | capfirst }}</option>
@@ -71,7 +78,7 @@
 							{% if single_product.stock <= 0 %}
 							<h5 class="text-danger">Out of Stock</h5>
 							{% else %}
-							<button type="submit" class="btn  btn-primary"> <span class="text">Add to Cart</span> <i class="fas fa-shopping-cart"></i> </button>
+							<button type="submit" class="btn  btn-primary"> <span class="text">Add to Cart</span> <i class="fa fa-shopping-cart"></i> </button>
 							{% endif %}
 						</article> <!-- product-info-aside .// -->
 					</form>
@@ -114,7 +121,7 @@
 						Review:
 						<textarea name="review" rows="4" class="form-control"></textarea>
 						<br>
-						{% if user.is_authenticated %}
+						 {% if user.is_authenticated %}
 							{% if orderproduct %}
 								<input type="submit" value="Submit Review" class="btn btn-primary">
 							{% else %}
@@ -122,9 +129,10 @@
 							{% endif %}
 						{% else %}
 						<p>You must be logged in to post a review. <span><a href="{% url 'login' %}">Login now</a></span></p>
-						{% endif %}
+						{% endif %} 
 
-
+					</div>
+{% include 'includes/alert.html' %}
 				</form>
 <br>
 <header class="section-heading">

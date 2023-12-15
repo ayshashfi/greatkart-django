@@ -30,17 +30,73 @@
 
 
 <div class="row">
-	{% for product in products %}
+	{% comment %} {% for product in products %}
 	<div class="col-md-3">
 		<div class="card card-product-grid">
-			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.images.url }}"> </a>
+			<a href="{{ product.get_url }}" class="img-wrap"> <img src="{{ product.image.url }}"> </a>
 			<figcaption class="info-wrap">
 				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-				<div class="price mt-1">$ {{ product.price }}</div> <!-- price-wrap.// -->
+				<div class="price mt-1">$ {{ product.product_price }}</div> <!-- price-wrap.// -->
+				<div class="rating-star">
+					<span>
+						<i class="fa fa-star{% if product.averageReview < 0.5 %}-o{% elif product.averageReview >= 0.5 and product.averageReview < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 1.5 %}-o{% elif product.averageReview >= 1.5 and product.averageReview < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 2.5 %}-o{% elif product.averageReview >= 2.5 and product.averageReview < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 3.5 %}-o{% elif product.averageReview >= 3.5 and product.averageReview < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 4.5 %}-o{% elif product.averageReview >= 4.5 and product.averageReview < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+
+						</span>
+				</div>
 			</figcaption>
 		</div>
 	</div> <!-- col.// -->
-	{% endfor %}
+	{% endfor %} {% endcomment %}
+	{% for c in products %}
+                                <div class="col-lg-1-5 col-md-4 col-12 col-sm-6">
+                                    <div class="product-cart-wrap mb-30">
+                                        <div class="product-img-action-wrap">
+                                            <div class="product-img product-img-zoom">
+                                                <a href="{% url 'product_detail' c.variant.product.id c.variant.id %}">
+                                                    <img class="default-img" src="{{c.image.url}}" alt="" />
+                                                    <img class="hover-img" src="{{c.image.url}}" alt="" />
+                                                </a>
+                                            </div>
+                                            
+                                            <div class="product-action">
+                                                <input type="hidden"  value="{{ c.variant.size.id }}" id="size-input" >
+                                                
+                                            </div>
+                                            <div class="product-badges product-badges-position product-badges-mrg">
+                                                {% comment %} <span class="hot">{{c.variant.product.offer.discount_amount|div:c.variant.product.product_price|mul:100|floatformat:0}}% OFF</span> {% endcomment %}
+                                            </div>
+                                        </div>
+                                        <div class="product-content-wrap">
+                                            <div class="product-category">
+                                                <a href="shop-grid-right.html">Clothing</a>
+                                            </div>
+                                            <h2><a href="{% url 'product_detail' c.variant.product.id c.variant.id %}">{{c.variant.product.product_name}}</a></h2>
+                                            {% comment %} <div class="product-rate-cover">
+                                                <div class="product-rate d-inline-block">
+                                                    <div class="product-rating" style="width: 90%"></div>
+                                                </div>
+                                                <span class="font-small ml-5 text-muted"> (4.0)</span>
+                                            </div> {% endcomment %}
+                                           
+                                            <div class="product-card-bottom">
+                                                <div class="product-price">
+                                                    {% comment %} <span>₹{{c.variant.product.product_price|sub:c.variant.product.offer.discount_amount}}</span> {% endcomment %}
+													<span>₹{{c.variant.product.product_price}}</span>
+                                                    <span class="old-price">₹{{c.variant.product.product_price}}</span>
+                                                </div>
+                                                <div class="add-cart">
+                                                    <a class="add"  data-product_id="{{ c.variant.id }}" href="{% url 'product_show' c.variant.product.id c.variant.id %}"><i class="fi-rs-shopping-cart mr-5"></i>View </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% endfor %}
 </div> <!-- row.// -->
 
 </div><!-- container // -->

@@ -1,10 +1,7 @@
 from django.shortcuts import render, redirect
 import logging
-from store.models import Product
-# from variant.models import Variant,VariantImage
-from .models import category
+from store.models import Product,Variation,VariantImage
 from django.contrib import messages
-from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
@@ -18,18 +15,13 @@ from django.http import Http404
 def categories(request):
     if not request.user.is_superadmin:
         return redirect('admin_login')
-    categories = category.objects.all().order_by('id')
-    p=Paginator(categories,10)
+    categories = category.objects.all()
+    p=Paginator(categories,6)
     page=request.GET.get('page')
     product_page=p.get_page(page)
     page_nums='a'*product_page.paginator.num_pages
-    context={
-        'categories': categories,
-        'product_page':product_page,
-        'page_nums':page_nums,
-        
-    }
-    return render(request, 'category/category.html',context )
+    return render(request, 'category/category.html', {'categories': categories,'product_page':product_page,
+        'page_nums':page_nums})
 
 
 @login_required(login_url='admin_login')
@@ -62,17 +54,18 @@ def add_category(request):
             return redirect('categories')
     except:
             return redirect('categories')
+       
 
 
 
 @login_required(login_url='admin_login')
-def edit_category(request, editcategory_id):
+def editcategory(request, editcategory_id):
     if not request.user.is_superadmin:
         return redirect('admin_login')
 
     try:
         # Retrieve the category instance to be edited
-        category_instance = category.objects.get(id=editcategory_id)
+        category_instance = category.objects.get(slug=editcategory_id)
 
         if request.method == 'POST':
             # Process the form data if the request method is POST
@@ -102,47 +95,60 @@ def edit_category(request, editcategory_id):
 
     except category.DoesNotExist:
         raise Http404("Category does not exist")  # Or redirect to an error page
-    return render(request, 'edit_category.html', {'category_instance': category_instance})
+    return render(request, 'category.html', {'category_instance': category_instance})
 
 
 
 @login_required(login_url='admin_login')
-def deletecategory(request, deletecategory_id):
+def deletecategory(request,deletecategory_id):
     if not request.user.is_superadmin:
         return redirect('admin_login')
+    categery = category.objects.get(slug=deletecategory_id)
+    products = Product.objects.filter(category=categery)
+    if categery.is_available:
+        for product in products:
+            product.is_available = False
+            product.save()
 
-    category_instance = category.objects.get(id=deletecategory_id)
-    products = Product.objects.filter(category=category_instance)
+            variants = Variation.objects.filter(product=product)
+            for variant in variants:
+                variant.is_available = False
+                variant.quantity = 0
+                variant.save()
+        categery.is_available = False
+        categery.save()
+        messages.success(request,'category deleted successfully!')
+    else:
+        for product in products:
+            product.is_available = True
+            product.save()
 
-    for product in products:
-        product.is_available = False
-        product.save()
-
-    # variants = Variant.objects.filter(product=product)
-    # for variant in variants:
-    #     variant.is_available = False
-    #     variant.quantity = 0
-    #     variant.save()
-
-    category_instance.delete()
-
-    messages.success(request, 'Category deleted successfully!')
+            variants = Variation.objects.filter(product=product)
+            for variant in variants:
+                variant.is_available = True
+                variant.quantity = 0
+                variant.save()
+        categery.is_available = True
+        categery.save()
+        messages.success(request,'category added successfully!')
     return redirect('categories')
 
 
 
-# @login_required(login_url='admin_login')
-# def category_search(request):
-#     search = request.POST.get('search')
-#     if search is None or search.strip() == '':
-#         messages.error(request,'Filed cannot empty!')
-#         return redirect('categories')
-#     categories = category.objects.filter(description__icontains=search )
-#     if categories :
-#         pass
-#         return render(request, 'category/category.html', { 'categories': categories})
-#     else:
-#         categories:False
-#         messages.error(request,'Search not found!')
-#         return redirect('categories')
+@login_required(login_url='admin_login')
+def category_search(request):
+    search = request.POST.get('search')
+    if search is None or search.strip() == '':
+        messages.error(request,'Filed cannot empty!')
+        return redirect('categories')
+    categories = category.objects.filter(category_name__icontains=search,is_available=True )
+    if categories :
+        pass
+        return render(request, 'category/category.html', {'categories': categories})
+    else:
+        categories=False
+        messages.error(request,'Search not found!')
+        return redirect('categories')
+
+
 

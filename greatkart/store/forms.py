@@ -1,5 +1,5 @@
 from django import forms 
-from . models import ReviewRating,Product, Variation
+from . models import ReviewRating,Product, Variation, VariantImage
 
 
 class ReviewForm(forms.ModelForm):
@@ -9,3 +9,7 @@ class ReviewForm(forms.ModelForm):
         
         
 
+class ImageForm(forms.ModelForm):
+    class Meta:
+        model = VariantImage
+        fields = ('image',)
